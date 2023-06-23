@@ -1,4 +1,4 @@
-import { styled } from ".";
+import { styled } from "..";
 
 export const HomeContainer = styled("main", {
   display: "flex",
@@ -8,7 +8,7 @@ export const HomeContainer = styled("main", {
   marginLeft: "auto",
 });
 
-export const Product = styled("a", {
+export const Product = styled("div", {
   background: "linear-gradient(180deg, #1ea483 0%, #7465d4 100%)",
   borderRadius: 12,
   cursor: "pointer",
@@ -30,22 +30,24 @@ export const Product = styled("a", {
 
     backgroundColor: "rgba(0,0,0,0.6)",
     borderRadius: 6,
+    height: "15%",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-
+    padding:"0 2rem 0 2rem",
     transform: "translateY(110%)",
     opacity: 0,
     transition: "all 0.2s ease-in-out",
 
     strong: {
       fontSize: "$lg",
+      color: "$gray100",
     },
 
     span: {
-      fontSize: "$xl    ",
+      fontSize: "$2xl",
       fontWeight: "bold",
-      color: "$green300",
+      color: "$green500",
     },
   },
 
