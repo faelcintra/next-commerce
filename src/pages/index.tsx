@@ -1,51 +1,85 @@
+import { GetStaticProps } from "next";
 import Image from "next/image";
+import Link from "next/link";
+import Stripe from "stripe";
 import { useKeenSlider } from "keen-slider/react";
 import "keen-slider/keen-slider.min.css";
 
-import { HomeContainer, Product } from "../styles/home";
+import { HomeContainer, Product } from "../styles/pages/home";
+import { stripe } from "../lib/stripe";
 
-import tshirt1 from "../../public/tshirts/tshirt_1.jpg";
-import tshirt2 from "../../public/tshirts/tshirt_2.jpg";
-import tshirt3 from "../../public/tshirts/tshirt_3.jpg";
-import tshirt4 from "../../public/tshirts/tshirt_4.jpg";
+import { log } from "console";
 
-export default function Home() {
+interface HomeProps {
+  products: {
+    id: string;
+    name: string;
+    imgUrl: string;
+    price: string;
+  }[];
+}
+
+export default function Home({ products }: HomeProps) {
   const [slideRef] = useKeenSlider({
     slides: {
       perView: 3,
-      spacing:48
+      spacing: 48,
     },
   });
   return (
     <HomeContainer ref={slideRef} className="keen-slider">
-      <Product className="keen-slider__slide">
-        <Image src={tshirt1} alt="img product" width={520} height={480} />
-        <footer>
-          <strong>Camiseta 1</strong>
-          <span>R$ 69,99</span>
-        </footer>
-      </Product>
-      <Product className="keen-slider__slide">
-        <Image src={tshirt2} alt="img product" width={520} height={480} />
-        <footer>
-          <strong>Camiseta 2</strong>
-          <span>R$ 69,99</span>
-        </footer>
-      </Product>
-      <Product className="keen-slider__slide">
-        <Image src={tshirt3} alt="img product" width={520} height={480} />
-        <footer>
-          <strong>Camiseta 3</strong>
-          <span>R$ 69,99</span>
-        </footer>
-      </Product>
-      <Product className="keen-slider__slide">
-        <Image src={tshirt4} alt="img product" width={520} height={480} />
-        <footer>
-          <strong>Camiseta 4</strong>
-          <span>R$ 69,99</span>
-        </footer>
-      </Product>
+      {products &&
+        products.map((product) => {
+          return (
+            <Link
+              key={product.id}
+              href={`/product/${product.id}`}
+              prefetch={false}
+            >
+              <Product className="keen-slider__slide">
+                <Image
+                  src={product.imgUrl}
+                  alt="img product"
+                  width={520}
+                  height={480}
+                />
+                <footer>
+                  <strong>{product.name}</strong>
+                  <span>{product.price}</span>
+                </footer>
+              </Product>
+            </Link>
+          );
+        })}
     </HomeContainer>
   );
 }
+
+export const getStaticProps: GetStaticProps = async () => {
+  const response = await stripe.products.list({
+    expand: ["data.default_price"],
+  });
+
+  console.log("revalidate");
+
+  const products = response.data.map((product) => {
+    const price = product.default_price as Stripe.Price;
+
+    return {
+      id: product.id,
+      imgUrl: product.images[0],
+      name: product.name,
+      price: new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(price.unit_amount / 100),
+    };
+  });
+
+  return {
+    props: {
+      products,
+    },
+    revalidate: 60 * 60 * 2, //2 hours
+  };
+};
