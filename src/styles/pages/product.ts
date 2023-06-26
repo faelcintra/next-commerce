@@ -60,9 +60,13 @@ export const ProductInfo = styled("div", {
     cursor: "pointer",
     fontWeight: "bold",
     fontSize: "$md",
-  
+
+    "&:disabled": {
+      opacity: 0.5,
+      cursor: "not-allowed",
+    },
     "&:hover": {
-        backgroundColor:"$green300",
-    }
-},
+      backgroundColor: "$green300",
+    },
+  },
 });
